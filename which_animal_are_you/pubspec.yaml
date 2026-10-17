@@ -38,6 +38,7 @@ dependencies:
   shared_preferences: ^2.5.2
   flutter_svg: ^2.0.17
   share_plus: ^10.1.4
+  screenshot: ^3.0.0
 
 dev_dependencies:
   flutter_test:

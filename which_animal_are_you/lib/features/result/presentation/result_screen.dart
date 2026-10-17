@@ -1,17 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/animal_constants.dart';
 import '../providers/result_provider.dart';
 import '../../home/presentation/home_screen.dart';
 
-class ResultScreen extends ConsumerWidget {
+class ResultScreen extends ConsumerStatefulWidget {
   const ResultScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends ConsumerState<ResultScreen> {
+  final ScreenshotController _screenshotController = ScreenshotController();
+  bool _isSharing = false;
+
+  Future<void> _shareAsStoryImage(
+      BuildContext context, AnimalData animal, int percentage) async {
+    if (_isSharing) return;
+    setState(() => _isSharing = true);
+    try {
+      final bytes = await _screenshotController.captureFromWidget(
+        _StoryCard(animal: animal, percentage: percentage),
+        pixelRatio: 2.0,
+        delay: const Duration(milliseconds: 100),
+        targetSize: const Size(540, 960),
+      );
+      final file = XFile.fromData(
+        bytes,
+        name: 'animal-story.png',
+        mimeType: 'image/png',
+      );
+      await Share.shareXFiles(
+        [file],
+        text:
+            'I am $percentage% ${animal.name}! Find out which animal you are with "Which Animal Are You?"!',
+      );
+    } catch (_) {
+      if (context.mounted) {
+        // Fallback to text share so the button never looks broken.
+        await Share.share(
+          'I am $percentage% ${animal.name}! ${animal.emoji}\n${animal.description}\nFind out which animal you are with "Which Animal Are You?"!',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(resultProvider);
     final animal = state.matchedAnimal;
 
@@ -25,7 +67,9 @@ class ResultScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.deepCharcoal : AppColors.softCream,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.deepCharcoal
+          : AppColors.softCream,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -36,7 +80,13 @@ class ResultScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _AnimalCard(animal: animal, percentage: state.matchPercentage),
               const SizedBox(height: 24),
-              _ShareCard(animal: animal, percentage: state.matchPercentage),
+              _ShareCard(
+                animal: animal,
+                percentage: state.matchPercentage,
+                isSharing: _isSharing,
+                onShare: () =>
+                    _shareAsStoryImage(context, animal, state.matchPercentage),
+              ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -52,8 +102,10 @@ class ResultScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.warmCoral,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32)),
                     elevation: 6,
                     shadowColor: AppColors.warmCoral.withOpacity(0.4),
                     textStyle: GoogleFonts.poppins(
@@ -89,17 +141,22 @@ class _Header extends StatelessWidget {
             fontWeight: FontWeight.w800,
             fontSize: 14,
             letterSpacing: 1.5,
-            color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.textDarkSecondary
+                : AppColors.textLightSecondary,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           '$percentage% ${animal.name}',
+          textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w800,
             fontSize: 36,
             letterSpacing: -2,
-            color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.textDarkPrimary
+                : AppColors.textLightPrimary,
           ),
         ),
       ],
@@ -129,7 +186,9 @@ class _AnimalCard extends StatelessWidget {
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Theme.of(context).brightness == Brightness.dark ? Colors.black.withOpacity(0.4) : Colors.black.withOpacity(0.05),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.4)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 20,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -172,7 +231,9 @@ class _AnimalCard extends StatelessWidget {
               fontWeight: FontWeight.w400,
               fontSize: 16,
               height: 1.7,
-              color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textDarkSecondary
+                  : AppColors.textLightSecondary,
             ),
           ),
           const SizedBox(height: 20),
@@ -182,7 +243,8 @@ class _AnimalCard extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: animal.traits.map((trait) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(16),
@@ -208,8 +270,15 @@ class _AnimalCard extends StatelessWidget {
 class _ShareCard extends StatelessWidget {
   final AnimalData animal;
   final int percentage;
+  final bool isSharing;
+  final VoidCallback onShare;
 
-  const _ShareCard({required this.animal, required this.percentage});
+  const _ShareCard({
+    required this.animal,
+    required this.percentage,
+    required this.isSharing,
+    required this.onShare,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -219,8 +288,12 @@ class _ShareCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1A1A2E) : const Color(0xFFFFF5F0),
-            Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121212) : const Color(0xFFF8F0F5),
+            Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF1A1A2E)
+                : const Color(0xFFFFF5F0),
+            Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF121212)
+                : const Color(0xFFF8F0F5),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -244,7 +317,8 @@ class _ShareCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 alignment: Alignment.center,
-                child: Text(animal.emoji, style: const TextStyle(fontSize: 24)),
+                child:
+                    Text(animal.emoji, style: const TextStyle(fontSize: 24)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -256,16 +330,22 @@ class _ShareCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
-                        color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.textDarkPrimary
+                                : AppColors.textLightPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Post to Instagram or WhatsApp!',
+                      'Story-ready 9:16 image for Instagram / WhatsApp!',
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w400,
                         fontSize: 13,
-                        color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.textDarkSecondary
+                                : AppColors.textLightSecondary,
                       ),
                     ),
                   ],
@@ -274,62 +354,39 @@ class _ShareCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'I am $percentage% ${animal.name}!',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Find out which animal you are with "Which Animal Are You?"!',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12,
-                          color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
-                        ),
-                      ),
-                    ],
+          // 9:16 story preview (scaled down).
+          Center(
+            child: Container(
+              width: 150,
+              height: 266,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: color.withOpacity(0.4), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.25),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
-                ),
-                Icon(Icons.share_rounded, color: color, size: 28),
-              ],
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: _StoryCard(animal: animal, percentage: percentage),
+              ),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Share.share(
-                  'I am $percentage% ${animal.name}! 🐾 ${animal.emoji}\n${animal.description}\nFind out which animal you are with "Which Animal Are You?"!',
-                );
-              },
+              onPressed: isSharing ? null : onShare,
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
                 elevation: 4,
                 shadowColor: color.withOpacity(0.4),
                 textStyle: GoogleFonts.poppins(
@@ -337,10 +394,193 @@ class _ShareCard extends StatelessWidget {
                   fontSize: 15,
                 ),
               ),
-              child: const Text('Share Result'),
+              child: isSharing
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Text('Share Result'),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 9:16 Instagram Story card (540 x 960 logical).
+/// Rendered both as an on-screen preview and as the captured share image.
+class _StoryCard extends StatelessWidget {
+  final AnimalData animal;
+  final int percentage;
+
+  const _StoryCard({required this.animal, required this.percentage});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Color(int.parse('0xFF${animal.colorCode.substring(1)}'));
+    return Material(
+      child: Container(
+        width: 540,
+        height: 960,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF121212),
+              Color.lerp(const Color(0xFF121212), color, 0.35) ??
+                  const Color(0xFF1E1E1E),
+              color,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Decorative circles.
+            Positioned(
+              top: -70,
+              right: -70,
+              child: Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.08),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -50,
+              left: -50,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.15),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 44),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('🐾', style: TextStyle(fontSize: 22)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'WHICH ANIMAL ARE YOU?',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          letterSpacing: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 36),
+                  Container(
+                    width: 210,
+                    height: 210,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.15),
+                      border:
+                          Border.all(color: Colors.white, width: 5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 30,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(animal.emoji,
+                          style: const TextStyle(fontSize: 110)),
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  Text(
+                    '$percentage%',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 84,
+                      height: 1,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    animal.name.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 34,
+                      letterSpacing: 1,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: animal.traits
+                        .take(3)
+                        .map(
+                          (t) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.5)),
+                            ),
+                            child: Text(
+                              t,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      'Discover your inner wild!',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
