@@ -1,7 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final scanMessageProvider = StateNotifierProvider<ScanMessageNotifier, String>((ref) {
-  return ScanMessageNotifier();
+final scanMessageProvider =
+    StateNotifierProvider<ScanMessageNotifier, String>((ref) {
+  return ScanMessageNotifier(loadingMessages);
+});
+
+final rootsMessageProvider =
+    StateNotifierProvider<ScanMessageNotifier, String>((ref) {
+  return ScanMessageNotifier(rootsLoadingMessages);
 });
 
 final loadingMessages = [
@@ -13,12 +19,23 @@ final loadingMessages = [
   'Matching primal energy...',
 ];
 
+final rootsLoadingMessages = [
+  'Scanning facial structure...',
+  'Analyzing heritage markers...',
+  'Tracing ancient migration routes...',
+  'Calculating origin blend...',
+  'Reading ancestry patterns...',
+  'Drawing your roots map...',
+];
+
 class ScanMessageNotifier extends StateNotifier<String> {
-  ScanMessageNotifier() : super(loadingMessages[0]);
+  final List<String> messages;
+
+  ScanMessageNotifier(this.messages) : super(messages[0]);
 
   void cycleMessages() {
-    final currentIndex = loadingMessages.indexOf(state);
-    final nextIndex = (currentIndex + 1) % loadingMessages.length;
-    state = loadingMessages[nextIndex];
+    final currentIndex = messages.indexOf(state);
+    final nextIndex = (currentIndex + 1) % messages.length;
+    state = messages[nextIndex];
   }
 }

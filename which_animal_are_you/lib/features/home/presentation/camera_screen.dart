@@ -7,7 +7,9 @@ import '../../scan/presentation/scan_screen.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class CameraCaptureScreen extends ConsumerStatefulWidget {
-  const CameraCaptureScreen({super.key});
+  final Widget Function(String imagePath)? nextScreen;
+
+  const CameraCaptureScreen({super.key, this.nextScreen});
 
   @override
   ConsumerState<CameraCaptureScreen> createState() => _CameraCaptureScreenState();
@@ -81,9 +83,11 @@ class _CameraCaptureScreenState extends ConsumerState<CameraCaptureScreen> with 
       final image = await _controller!.takePicture();
       if (!mounted) return;
       final filePath = image.path;
+      final next = widget.nextScreen?.call(filePath);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => ScanScreen(imagePath: filePath)),
+        MaterialPageRoute(
+            builder: (_) => next ?? ScanScreen(imagePath: filePath)),
       );
     } catch (e) {
       if (mounted) {

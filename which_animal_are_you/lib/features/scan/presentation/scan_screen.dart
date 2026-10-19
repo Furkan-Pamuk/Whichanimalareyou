@@ -13,8 +13,19 @@ import '../../result/presentation/result_screen.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
   final String imagePath;
+  final bool rootsMode;
+  final void Function(WidgetRef ref)? onStart;
+  final Future<void> Function(WidgetRef ref)? onAnalyze;
+  final Widget resultScreen;
 
-  const ScanScreen({super.key, required this.imagePath});
+  const ScanScreen({
+    super.key,
+    required this.imagePath,
+    this.rootsMode = false,
+    this.onStart,
+    this.onAnalyze,
+    this.resultScreen = const ResultScreen(),
+  });
 
   @override
   ConsumerState<ScanScreen> createState() => _ScanScreenState();
@@ -40,25 +51,37 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
     )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(resultProvider.notifier).startAnalysis(widget.imagePath);
+      if (widget.onStart != null) {
+        widget.onStart!(ref);
+      } else {
+        ref.read(resultProvider.notifier).startAnalysis(widget.imagePath);
+      }
       _startScan();
     });
 
     // Cycle loading messages every 2 seconds (outside build, safe).
     _messageTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       if (!mounted) return;
-      ref.read(scanMessageProvider.notifier).cycleMessages();
+      if (widget.rootsMode) {
+        ref.read(rootsMessageProvider.notifier).cycleMessages();
+      } else {
+        ref.read(scanMessageProvider.notifier).cycleMessages();
+      }
     });
   }
 
   Future<void> _startScan() async {
-    final pool = ref.read(selectedCategoryDataProvider).items;
-    await ref.read(resultProvider.notifier).completeAnalysis(pool: pool);
+    if (widget.onAnalyze != null) {
+      await widget.onAnalyze!(ref);
+    } else {
+      final pool = ref.read(selectedCategoryDataProvider).items;
+      await ref.read(resultProvider.notifier).completeAnalysis(pool: pool);
+    }
     if (mounted) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const ResultScreen(),
+          builder: (_) => widget.resultScreen,
         ),
       );
     }
@@ -74,7 +97,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
 
   @override
   Widget build(BuildContext context) {
-    final message = ref.watch(scanMessageProvider);
+    final message = widget.rootsMode
+        ? ref.watch(rootsMessageProvider)
+        : ref.watch(scanMessageProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D14),
       body: Stack(

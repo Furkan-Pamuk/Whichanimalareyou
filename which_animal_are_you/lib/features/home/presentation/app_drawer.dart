@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_categories.dart';
 import '../../../core/providers/category_provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../roots/presentation/roots_flow.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -133,6 +134,53 @@ class AppDrawer extends ConsumerWidget {
               );
             }),
             const Spacer(),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.vibrantAmber.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text('🧬',
+                      style: TextStyle(fontSize: 24)),
+                ),
+                title: Text(
+                  'DNA Roots Map',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: isDark
+                        ? AppColors.textDarkPrimary
+                        : AppColors.textLightPrimary,
+                  ),
+                ),
+                subtitle: Text(
+                  'Find your origin from a selfie',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.textDarkSecondary
+                        : AppColors.textLightSecondary,
+                  ),
+                ),
+                trailing: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 18),
+                onTap: () {
+                  Navigator.pop(context);
+                  startRootsFlow(context);
+                },
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
