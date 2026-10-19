@@ -3,7 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class BrandLogo extends StatelessWidget {
-  const BrandLogo({super.key});
+  final String emoji;
+  final String title;
+
+  const BrandLogo({
+    super.key,
+    this.emoji = '🐾',
+    this.title = 'Which Animal Are You?',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +41,15 @@ class BrandLogo extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              '🐾',
+              emoji,
               style: TextStyle(fontSize: 56),
             ),
           ),
         ),
         const SizedBox(height: 16),
         Text(
-          'Which Animal Are You?',
+          title,
+          textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w800,
             fontSize: 28,

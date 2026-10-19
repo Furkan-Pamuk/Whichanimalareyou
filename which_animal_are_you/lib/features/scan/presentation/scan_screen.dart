@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../result/providers/result_provider.dart';
+import '../../../core/providers/category_provider.dart';
 import '../providers/scan_provider.dart';
 import '../../result/presentation/result_screen.dart';
 
@@ -51,7 +52,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
   }
 
   Future<void> _startScan() async {
-    await ref.read(resultProvider.notifier).completeAnalysis();
+    final pool = ref.read(selectedCategoryDataProvider).items;
+    await ref.read(resultProvider.notifier).completeAnalysis(pool: pool);
     if (mounted) {
       Navigator.pushReplacement(
         context,

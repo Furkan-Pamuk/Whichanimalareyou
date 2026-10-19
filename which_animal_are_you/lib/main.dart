@@ -16,7 +16,7 @@ class WhichAnimalApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = ref.watch(themeModeProvider);
     return MaterialApp(
-      title: 'Which Animal Are You?',
+      title: 'Which One Are You?',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),

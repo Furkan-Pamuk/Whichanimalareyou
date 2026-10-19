@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/providers/category_provider.dart';
+import 'app_drawer.dart';
 import 'camera_screen.dart';
 import '../../scan/presentation/scan_screen.dart';
 import 'brand_logo.dart';
@@ -55,9 +57,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = ref.watch(themeModeProvider);
+    final category = ref.watch(selectedCategoryDataProvider);
     return Scaffold(
       extendBodyBehindAppBar: true,
+      drawer: const AppDrawer(),
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu_rounded),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -85,10 +95,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-              BrandLogo(),
+              BrandLogo(emoji: category.logoEmoji, title: category.title),
               const SizedBox(height: 48),
               Text(
-                'Discover Your Inner Wild!',
+                category.headline,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w800,
@@ -99,7 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Capture a selfie or upload your photo to reveal your animal counterpart with a fun personality score.',
+                category.subtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.w400,
@@ -151,8 +161,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     _StepItem(number: '1', text: 'Snap a selfie or upload a photo'),
-                    _StepItem(number: '2', text: 'Our AI analyzes your wild traits'),
-                    _StepItem(number: '3', text: 'Discover your animal match!'),
+                    _StepItem(number: '2', text: 'Our AI analyzes your traits'),
+                    _StepItem(
+                        number: '3',
+                        text: 'Discover your ${category.noun.toLowerCase()} match!'),
                   ],
                 ),
               ),

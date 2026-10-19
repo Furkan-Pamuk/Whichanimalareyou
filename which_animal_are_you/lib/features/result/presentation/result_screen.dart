@@ -5,6 +5,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/animal_constants.dart';
+import '../../../../core/providers/category_provider.dart';
 import '../providers/result_provider.dart';
 import '../../home/presentation/home_screen.dart';
 
@@ -19,13 +20,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
   bool _isSharing = false;
 
-  Future<void> _shareAsStoryImage(
-      BuildContext context, AnimalData animal, int percentage) async {
+  Future<void> _shareAsStoryImage(BuildContext context, AnimalData animal,
+      int percentage, String brandTitle) async {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
       final bytes = await _screenshotController.captureFromWidget(
-        _StoryCard(animal: animal, percentage: percentage),
+        _StoryCard(
+            animal: animal, percentage: percentage, brandTitle: brandTitle),
         pixelRatio: 2.0,
         delay: const Duration(milliseconds: 100),
         targetSize: const Size(540, 960),
@@ -38,13 +40,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
       await Share.shareXFiles(
         [file],
         text:
-            'I am $percentage% ${animal.name}! Find out which animal you are with "Which Animal Are You?"!',
+            'I am $percentage% ${animal.name}! Find out which one you are with "Which One Are You?"!',
       );
     } catch (_) {
       if (context.mounted) {
         // Fallback to text share so the button never looks broken.
         await Share.share(
-          'I am $percentage% ${animal.name}! ${animal.emoji}\n${animal.description}\nFind out which animal you are with "Which Animal Are You?"!',
+          'I am $percentage% ${animal.name}! ${animal.emoji}\n${animal.description}\nFind out which one you are with "Which One Are You?"!',
         );
       }
     } finally {
@@ -56,6 +58,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(resultProvider);
     final animal = state.matchedAnimal;
+    final category = ref.watch(selectedCategoryDataProvider);
 
     if (state.isLoading || animal == null) {
       return const Scaffold(
@@ -76,16 +79,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _Header(animal: animal, percentage: state.matchPercentage),
+              _Header(
+                  animal: animal,
+                  percentage: state.matchPercentage,
+                  noun: category.noun),
               const SizedBox(height: 24),
               _AnimalCard(animal: animal, percentage: state.matchPercentage),
               const SizedBox(height: 24),
               _ShareCard(
                 animal: animal,
                 percentage: state.matchPercentage,
+                brandTitle: category.title,
                 isSharing: _isSharing,
-                onShare: () =>
-                    _shareAsStoryImage(context, animal, state.matchPercentage),
+                onShare: () => _shareAsStoryImage(
+                    context, animal, state.matchPercentage, category.title),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -128,15 +135,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 class _Header extends StatelessWidget {
   final AnimalData animal;
   final int percentage;
+  final String noun;
 
-  const _Header({required this.animal, required this.percentage});
+  const _Header(
+      {required this.animal, required this.percentage, required this.noun});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Your Animal Match',
+          'Your $noun Match',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w800,
             fontSize: 14,
@@ -270,12 +279,14 @@ class _AnimalCard extends StatelessWidget {
 class _ShareCard extends StatelessWidget {
   final AnimalData animal;
   final int percentage;
+  final String brandTitle;
   final bool isSharing;
   final VoidCallback onShare;
 
   const _ShareCard({
     required this.animal,
     required this.percentage,
+    required this.brandTitle,
     required this.isSharing,
     required this.onShare,
   });
@@ -372,7 +383,10 @@ class _ShareCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: _StoryCard(animal: animal, percentage: percentage),
+                child: _StoryCard(
+                    animal: animal,
+                    percentage: percentage,
+                    brandTitle: brandTitle),
               ),
             ),
           ),
@@ -417,8 +431,12 @@ class _ShareCard extends StatelessWidget {
 class _StoryCard extends StatelessWidget {
   final AnimalData animal;
   final int percentage;
+  final String brandTitle;
 
-  const _StoryCard({required this.animal, required this.percentage});
+  const _StoryCard(
+      {required this.animal,
+      required this.percentage,
+      required this.brandTitle});
 
   @override
   Widget build(BuildContext context) {
@@ -477,7 +495,7 @@ class _StoryCard extends StatelessWidget {
                       const Text('🐾', style: TextStyle(fontSize: 22)),
                       const SizedBox(width: 8),
                       Text(
-                        'WHICH ANIMAL ARE YOU?',
+                        'WHICH ONE ARE YOU?',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
@@ -487,7 +505,18 @@ class _StoryCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 8),
+                  Text(
+                    brandTitle.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 1.5,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
                   Container(
                     width: 210,
                     height: 210,

@@ -44,9 +44,11 @@ class ResultNotifier extends StateNotifier<ResultState> {
     );
   }
 
-  Future<void> completeAnalysis() async {
+  Future<void> completeAnalysis({List<AnimalData>? pool}) async {
     await Future.delayed(const Duration(seconds: 3));
-    final animal = _generateMatch();
+    final list =
+        (pool != null && pool.isNotEmpty) ? pool : AnimalArchetypes.animals;
+    final animal = _generateMatch(list);
     final score = Random().nextInt(35) + 65; // 65 - 99%
     state = ResultState(
       isLoading: false,
@@ -56,9 +58,8 @@ class ResultNotifier extends StateNotifier<ResultState> {
     );
   }
 
-  AnimalData _generateMatch() {
+  AnimalData _generateMatch(List<AnimalData> animals) {
     final random = Random();
-    final animals = AnimalArchetypes.animals;
     return animals[random.nextInt(animals.length)];
   }
 
