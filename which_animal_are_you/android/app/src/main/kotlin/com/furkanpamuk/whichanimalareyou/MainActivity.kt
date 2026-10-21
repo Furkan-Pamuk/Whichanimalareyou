@@ -1,4 +1,4 @@
-package com.example.which_animal_are_you
+package com.furkanpamuk.whichanimalareyou
 
 import io.flutter.embedding.android.FlutterActivity
 

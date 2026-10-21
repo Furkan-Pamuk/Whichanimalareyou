@@ -123,6 +123,18 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   child: const Text('Try Again'),
                 ),
               ),
+              const SizedBox(height: 12),
+              Text(
+                'Results are generated for entertainment purposes.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.textDarkSecondary
+                      : AppColors.textLightSecondary,
+                ),
+              ),
               const SizedBox(height: 24),
             ],
           ),

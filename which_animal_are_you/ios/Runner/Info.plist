@@ -22,6 +22,10 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access so you can take a selfie and discover your fun match. Your photo never leaves your device.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access so you can upload a picture and discover your fun match. Your photo never leaves your device.</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
