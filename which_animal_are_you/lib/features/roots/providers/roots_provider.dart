@@ -106,6 +106,34 @@ class RootsNotifier extends StateNotifier<RootsState> {
           'Mystical and poetic, your blood remembers green hills, ancient legends and a touch of magic.',
       colorCode: '#2E7D32',
     ),
+    RegionShare(
+      name: 'Polynesian',
+      emoji: '🏝️',
+      description:
+          'Sunny and free, your roots sway with ocean waves and island drums. Paradise is your home address.',
+      colorCode: '#00ACC1',
+    ),
+    RegionShare(
+      name: 'Himalayan',
+      emoji: '🏔️',
+      description:
+          'Peaceful and towering, your heritage breathes thin mountain air and ancient mountain wisdom.',
+      colorCode: '#78909C',
+    ),
+    RegionShare(
+      name: 'Caribbean',
+      emoji: '🏖️',
+      description:
+          'Rhythmic and warm, your blood moves to steel drums with rum, sun and endless summer.',
+      colorCode: '#FFB300',
+    ),
+    RegionShare(
+      name: 'Arctic',
+      emoji: '🐻‍❄️',
+      description:
+          'Tough and radiant, your roots glow under polar skies. Ice in your veins, fire in your heart.',
+      colorCode: '#4FC3F7',
+    ),
   ];
 
   void startAnalysis(String imagePath) {

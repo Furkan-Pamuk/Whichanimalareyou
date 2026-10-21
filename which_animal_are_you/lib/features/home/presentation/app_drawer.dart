@@ -81,7 +81,7 @@ class AppDrawer extends ConsumerWidget {
                   int.parse('0xFF${category.colorCode.substring(1)}'));
               return Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                 child: ListTile(
                   selected: isSelected,
                   selectedTileColor: color.withOpacity(0.12),
@@ -111,16 +111,6 @@ class AppDrawer extends ConsumerWidget {
                           : AppColors.textLightPrimary,
                     ),
                   ),
-                  subtitle: Text(
-                    '${category.items.length} matches',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                      color: isDark
-                          ? AppColors.textDarkSecondary
-                          : AppColors.textLightSecondary,
-                    ),
-                  ),
                   trailing: isSelected
                       ? Icon(Icons.check_circle_rounded,
                           color: color, size: 24)
@@ -134,10 +124,9 @@ class AppDrawer extends ConsumerWidget {
                 ),
               );
             }),
-            const Spacer(),
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
               child: ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -163,16 +152,6 @@ class AppDrawer extends ConsumerWidget {
                         : AppColors.textLightPrimary,
                   ),
                 ),
-                subtitle: Text(
-                  'Find your origin from a selfie',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.textDarkSecondary
-                        : AppColors.textLightSecondary,
-                  ),
-                ),
                 trailing: const Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 18),
@@ -185,6 +164,7 @@ class AppDrawer extends ConsumerWidget {
                 },
               ),
             ),
+            const Spacer(),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
