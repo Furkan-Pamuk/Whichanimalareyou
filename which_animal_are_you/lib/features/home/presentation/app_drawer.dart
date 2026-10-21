@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_categories.dart';
 import '../../../core/providers/category_provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_navigator.dart';
 import '../../roots/presentation/roots_flow.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -177,7 +178,10 @@ class AppDrawer extends ConsumerWidget {
                     size: 18),
                 onTap: () {
                   Navigator.pop(context);
-                  startRootsFlow(context);
+                  final rootContext = appNavigatorKey.currentContext;
+                  if (rootContext != null && rootContext.mounted) {
+                    startRootsFlow(rootContext);
+                  }
                 },
               ),
             ),
