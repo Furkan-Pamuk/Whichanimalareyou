@@ -288,20 +288,6 @@ class _PhotoCard extends StatelessWidget {
                 const _CornerBracket(alignment: Alignment.topRight),
                 const _CornerBracket(alignment: Alignment.bottomLeft),
                 const _CornerBracket(alignment: Alignment.bottomRight),
-                // Center face guide.
-                Center(
-                  child: Container(
-                    width: 190,
-                    height: 230,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(110),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.55),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
                 // Live badge.
                 Positioned(
                   top: 14,
